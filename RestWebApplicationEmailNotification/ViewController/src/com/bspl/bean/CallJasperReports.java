@@ -48,7 +48,7 @@ public class CallJasperReports {
         }
         try {
             String query =
-                "select ref_document_number,report_path,report_name,report_param_val,report_format,pdf_generated FROM public.email_notification where pdf_generated is null";
+                "select ref_document_number,report_path,report_name,report_param_val,report_format,pdf_generated,ref_document_id FROM public.email_notification where pdf_generated is null";
             ps1 = conn.prepareStatement(query);
             rs1 = ps1.executeQuery();
             while (rs1.next()) {
@@ -84,7 +84,7 @@ public class CallJasperReports {
                             exporter.setParameter(JRExporterParameter.JASPER_PRINT, jasperPrint);
                             //   String exportPath = "/home/lenovo/jdeveloper/pdffile/test.pdf";
                             //String exportPath ="/root/Documents/reportspdf/" + po + ".pdf";
-                            String exportPath = "/home/lenovo/jdeveloper/pdffile/" + po + ".pdf";
+                            String exportPath = "/home/oracle/pdfdownload/" + po + ".pdf";
                             JasperExportManager.exportReportToPdfFile(jasperPrint, exportPath);
                         } else {
                             fileName = "Doc_" + report_name + ".xls";
@@ -94,7 +94,7 @@ public class CallJasperReports {
                             exporter.setParameter(JRXlsExporterParameter.IS_WHITE_PAGE_BACKGROUND, Boolean.FALSE);
                             exporter.setParameter(JRExporterParameter.JASPER_PRINT, jasperPrint);
                             // String exportPath = "/home/lenovo/jdeveloper/pdffile/test.xls";
-                            String exportPath = "/root/Documents/reportspdf/" + po + ".pdf";
+                            String exportPath = "/home/oracle/pdfdownload/" + po + ".pdf";
                             JasperExportManager.exportReportToPdfFile(jasperPrint, exportPath);
                         }
                     }

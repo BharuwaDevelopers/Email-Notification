@@ -259,10 +259,6 @@
             <value n="isJDK" v="false"/>
          </hash>
          <hash>
-            <value n="id" v="Poi-3.9.jar"/>
-            <value n="isJDK" v="false"/>
-         </hash>
-         <hash>
             <value n="id" v="Jasperreports-5.6.0.jar"/>
             <value n="isJDK" v="false"/>
          </hash>
@@ -272,6 +268,18 @@
          </hash>
          <hash>
             <value n="id" v="Javax.mail.jar"/>
+            <value n="isJDK" v="false"/>
+         </hash>
+         <hash>
+            <value n="id" v="Poi-3.9.jar"/>
+            <value n="isJDK" v="false"/>
+         </hash>
+         <hash>
+            <value n="id" v="Arial.jar"/>
+            <value n="isJDK" v="false"/>
+         </hash>
+         <hash>
+            <value n="id" v="IText-2.1.7.js2.jar"/>
             <value n="isJDK" v="false"/>
          </hash>
       </list>
@@ -288,16 +296,7 @@
             </hash>
             <hash>
                <list n="classPath">
-                  <url path="../../../jar/poi-3.9.jar" jar-entry=""/>
-               </list>
-               <value n="deployedByDefault" v="true"/>
-               <value n="description" v="Poi-3.9.jar"/>
-               <value n="id" v="Poi-3.9.jar"/>
-               <value n="locked" v="true"/>
-            </hash>
-            <hash>
-               <list n="classPath">
-                  <url path="../../../jar/jasperreports-5.6.0.jar" jar-entry=""/>
+                  <url path="../../../../jar/jasperreports-5.6.0.jar" jar-entry=""/>
                </list>
                <value n="deployedByDefault" v="true"/>
                <value n="description" v="Jasperreports-5.6.0.jar"/>
@@ -306,7 +305,7 @@
             </hash>
             <hash>
                <list n="classPath">
-                  <url path="../../../jar/jasperreports-fonts-5.6.0.jar" jar-entry=""/>
+                  <url path="../../../../jar/jasperreports-fonts-5.6.0.jar" jar-entry=""/>
                </list>
                <value n="deployedByDefault" v="true"/>
                <value n="description" v="Jasperreports-fonts-5.6.0.jar"/>
@@ -315,11 +314,38 @@
             </hash>
             <hash>
                <list n="classPath">
-                  <url path="../../../jar/javax.mail.jar" jar-entry=""/>
+                  <url path="../../../../jar/javax.mail.jar" jar-entry=""/>
                </list>
                <value n="deployedByDefault" v="true"/>
                <value n="description" v="Javax.mail.jar"/>
                <value n="id" v="Javax.mail.jar"/>
+               <value n="locked" v="true"/>
+            </hash>
+            <hash>
+               <list n="classPath">
+                  <url path="../../../../jar/poi-3.9.jar" jar-entry=""/>
+               </list>
+               <value n="deployedByDefault" v="true"/>
+               <value n="description" v="Poi-3.9.jar"/>
+               <value n="id" v="Poi-3.9.jar"/>
+               <value n="locked" v="true"/>
+            </hash>
+            <hash>
+               <list n="classPath">
+                  <url path="../../../../jar/Arial.jar" jar-entry=""/>
+               </list>
+               <value n="deployedByDefault" v="true"/>
+               <value n="description" v="Arial.jar"/>
+               <value n="id" v="Arial.jar"/>
+               <value n="locked" v="true"/>
+            </hash>
+            <hash>
+               <list n="classPath">
+                  <url path="../../../../jar/iText-2.1.7.js2.jar" jar-entry=""/>
+               </list>
+               <value n="deployedByDefault" v="true"/>
+               <value n="description" v="IText-2.1.7.js2.jar"/>
+               <value n="id" v="IText-2.1.7.js2.jar"/>
                <value n="locked" v="true"/>
             </hash>
          </list>
@@ -402,10 +428,6 @@
             <value n="isJDK" v="false"/>
          </hash>
          <hash>
-            <value n="id" v="Poi-3.9.jar"/>
-            <value n="isJDK" v="false"/>
-         </hash>
-         <hash>
             <value n="id" v="Jasperreports-5.6.0.jar"/>
             <value n="isJDK" v="false"/>
          </hash>
@@ -415,6 +437,18 @@
          </hash>
          <hash>
             <value n="id" v="Javax.mail.jar"/>
+            <value n="isJDK" v="false"/>
+         </hash>
+         <hash>
+            <value n="id" v="Poi-3.9.jar"/>
+            <value n="isJDK" v="false"/>
+         </hash>
+         <hash>
+            <value n="id" v="Arial.jar"/>
+            <value n="isJDK" v="false"/>
+         </hash>
+         <hash>
+            <value n="id" v="IText-2.1.7.js2.jar"/>
             <value n="isJDK" v="false"/>
          </hash>
       </list>
