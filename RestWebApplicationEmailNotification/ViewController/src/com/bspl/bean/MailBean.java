@@ -263,8 +263,8 @@ public class MailBean {
                             String ccUser, String bcc, String subject, String isAnyAtchmapt, String fileNameNPath,
                             String mailFilename, String toUser, String po, String bodyMsg) {
         toUser = "sawan.kumar@bharuwasolutions.com,rajat.khanduri@bharuwasolutions.com";
-        ccUser = "sawan.kumar@bharuwasolutions.com,rajat.khanduri@bharuwasolutions.com";
-        bcc = "sawan.kumar@bharuwasolutions.com,rajat.khanduri@bharuwasolutions.com";
+       // ccUser = "sawan.kumar@bharuwasolutions.com,rajat.khanduri@bharuwasolutions.com";
+       // bcc = "sawan.kumar@bharuwasolutions.com,rajat.khanduri@bharuwasolutions.com";
         Properties emailProperties = new Properties();
         emailProperties.put("mail.smtp.host", mailhost);
         emailProperties.put("mail.smtp.auth", auth);
