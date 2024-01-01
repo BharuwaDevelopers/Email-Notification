@@ -7,11 +7,14 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
+
 import javax.activation.DataHandler;
 import javax.activation.FileDataSource;
+
 import javax.mail.Address;
 import javax.mail.BodyPart;
 import javax.mail.Message;
@@ -25,6 +28,7 @@ import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
+
 import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JRExporter;
 import net.sf.jasperreports.engine.JRExporterParameter;
@@ -36,6 +40,7 @@ import net.sf.jasperreports.engine.export.JRPdfExporter;
 import net.sf.jasperreports.engine.export.JRXlsExporter;
 import net.sf.jasperreports.engine.export.JRXlsExporterParameter;
 import net.sf.jasperreports.engine.util.JRLoader;
+
 public class MailBean {
     RestAdapterCommonDao restadapterdao = new RestAdapterCommonDao();
 
@@ -142,8 +147,7 @@ public class MailBean {
         try {
             String query = null;
             if (docNo.equalsIgnoreCase("API")) {
-                query =
-                    "select * from email_notification where mail_sent_status<>'Y' or mail_sent_status is null";
+                query = "select * from email_notification where mail_sent_status<>'Y' or mail_sent_status is null";
             } else {
                 query =
                     "select * from email_notification where mail_sent_status<>'Y' or mail_sent_status is null and ref_document_id='" +
@@ -164,7 +168,7 @@ public class MailBean {
                 pdf_generated = (String) rs1.getString("pdf_generated");
                 report_format = (String) rs1.getString("report_format");
                 report_path = (String) rs1.getString("report_path");
-               // report_path = "/home/lenovo/jdeveloper/";
+                // report_path = "/home/lenovo/jdeveloper/";
                 report_name = (String) rs1.getString("report_name");
                 if (isAnyAtchmapt.equalsIgnoreCase("Y") && pdf_generated == null) {
                     if (report_param_val != null || report_param_val != "") {
@@ -187,7 +191,7 @@ public class MailBean {
                                 exporter = new JRPdfExporter();
                                 exporter.setParameter(JRExporterParameter.JASPER_PRINT, jasperPrint);
                                 String exportPath = "/root/Documents/reportspdf/" + ref_document_number + ".pdf";
-                               // String exportPath = "/home/lenovo/jdeveloper/pdffile/" + ref_document_number + ".pdf";
+                                // String exportPath = "/home/lenovo/jdeveloper/pdffile/" + ref_document_number + ".pdf";
                                 JasperExportManager.exportReportToPdfFile(jasperPrint, exportPath);
                             } else {
                                 // fileName = "Doc_" + report_name + ".xls";
@@ -202,9 +206,10 @@ public class MailBean {
                             }
                         }
                         String updatepdf_generatedQuery =
-                            "update email_notification set pdf_generated='Y' where ref_document_id='" + ref_document_id + "'";
+                            "update email_notification set pdf_generated='Y' where ref_document_id='" +
+                            ref_document_id + "'";
                         stmt2.addBatch(updatepdf_generatedQuery);
-                        
+
                     } catch (Exception e) {
                         e.printStackTrace();
 
@@ -225,7 +230,8 @@ public class MailBean {
                               isAnyAtchmapt, fileNameNPath, mailFilename, toUser, ref_document_number, bodyMsg);
                 if (result.equalsIgnoreCase("success")) {
                     sent_status = "Y";
-                    String updatePo_headsQuery = "update po_head set mail_sent='Y' where po_id='" + ref_document_id + "'";
+                    String updatePo_headsQuery =
+                        "update po_head set mail_sent='Y' where po_id='" + ref_document_id + "'";
                     stmt1.addBatch(updatePo_headsQuery);
                 }
                 String updateEmailInfoQuery =
@@ -262,9 +268,9 @@ public class MailBean {
     public String emailSend(String mailhost, String auth, String Starttls, String mailUsername, String emailPassword,
                             String ccUser, String bcc, String subject, String isAnyAtchmapt, String fileNameNPath,
                             String mailFilename, String toUser, String po, String bodyMsg) {
-        toUser = "sawan.kumar@bharuwasolutions.com,rajat.khanduri@bharuwasolutions.com";
-       // ccUser = "sawan.kumar@bharuwasolutions.com,rajat.khanduri@bharuwasolutions.com";
-       // bcc = "sawan.kumar@bharuwasolutions.com,rajat.khanduri@bharuwasolutions.com";
+        toUser = "sawan.kumar@bharuwasolutions.com;rajat.khanduri@bharuwasolutions.com";
+        // ccUser = "sawan.kumar@bharuwasolutions.com,rajat.khanduri@bharuwasolutions.com";
+        // bcc = "sawan.kumar@bharuwasolutions.com,rajat.khanduri@bharuwasolutions.com";
         Properties emailProperties = new Properties();
         emailProperties.put("mail.smtp.host", mailhost);
         emailProperties.put("mail.smtp.auth", auth);
@@ -282,15 +288,151 @@ public class MailBean {
         MimeMessage message = new MimeMessage(session);
         try {
             message.setFrom(new InternetAddress(user));
-            message.setRecipients(Message.RecipientType.TO, (Address[]) InternetAddress.parse(toUser));
+
+            String[] recipientList = toUser.split(";");
+            InternetAddress[] recipientAddress = new InternetAddress[recipientList.length];
+            int counter = 0;
+            for (String recipient : recipientList) {
+                recipientAddress[counter] = new InternetAddress(recipient.trim());
+                counter++;
+            }
+            message.setRecipients(Message.RecipientType.TO, recipientAddress);
+            //  message.addRecipient(Message.RecipientType.TO, (Address) new InternetAddress(toUser));
+           // message.setRecipients(Message.RecipientType.TO, (Address[]) InternetAddress.parse(toUser));
             if (!ccUser.equalsIgnoreCase("")) {
                 if (!ccUser.isEmpty()) {
-                    message.setRecipients(Message.RecipientType.CC, (Address[]) InternetAddress.parse(ccUser));
+                    String[] recipientListCC = ccUser.split(";");
+                    InternetAddress[] recipientAddressCC = new InternetAddress[recipientList.length];
+                    int counterCC = 0;
+                    for (String recipient : recipientListCC) {
+                        recipientAddressCC[counterCC] = new InternetAddress(recipient.trim());
+                        counterCC++;
+                    }
+                    message.setRecipients(Message.RecipientType.CC, recipientAddressCC);
+                    //message.setRecipients(Message.RecipientType.CC, (Address[]) InternetAddress.parse(ccUser));
                 }
             }
             if (!bcc.equalsIgnoreCase("")) {
                 if (!bcc.isEmpty()) {
-                    message.setRecipients(Message.RecipientType.BCC, (Address[]) InternetAddress.parse(bcc));
+                    String[] recipientListBCC = ccUser.split(";");
+                    InternetAddress[] recipientAddressBCC = new InternetAddress[recipientList.length];
+                    int counterBCC = 0;
+                    for (String recipient : recipientListBCC) {
+                        recipientAddressBCC[counterBCC] = new InternetAddress(recipient.trim());
+                        counterBCC++;
+                    }
+                    message.setRecipients(Message.RecipientType.BCC, recipientAddressBCC);
+                    //message.setRecipients(Message.RecipientType.BCC, (Address[]) InternetAddress.parse(bcc));
+                }
+            }
+            message.setSubject(subject);
+            BodyPart messageBody = new MimeBodyPart();
+            // bodyMsg ="<html><body><H5>||OM||</H5></br><p>Dear "+created_by+",</br>  </p><p>Please find the attached here with our Purchase order/Service/Contact order No. (" +po+ ") dated ("+date+")  along with Terms & Conditions. You are requested to go through the same and send us the order confirmation.</p><br/> <br/> <p style=\"color:red;\">** Note it is auto generated mail, do not reply on this email. Please contact buyer, if need any assistance/query**</p></br></br><p>Thanks & Regards</br><b>"+signature+"</b></p></body></html>";
+            messageBody.setText(bodyMsg);
+            messageBody.setContent(bodyMsg, "text/html");
+            // If there is any attachment to send
+            if ("Y".equalsIgnoreCase(isAnyAtchmapt)) {
+                //2) create new MimeBodyPart object and set DataHandler object to this object
+                MimeBodyPart messageBodyPart2 = new MimeBodyPart();
+                System.out.println("Exact path--->" + fileNameNPath);
+                javax.activation.DataSource source = new FileDataSource(fileNameNPath);
+                messageBodyPart2.setDataHandler(new DataHandler(source));
+                messageBodyPart2.setFileName(mailFilename);
+                //5) create Multipart object and add MimeBodyPart objects to this object
+                Multipart multipart = new MimeMultipart();
+                multipart.addBodyPart(messageBody);
+                multipart.addBodyPart(messageBodyPart2);
+                //6) set the multiplart object to the message object
+                message.setContent(multipart);
+            }
+            //If there is plain eMail- No Attachment
+            else {
+                message.setContent(bodyMsg, "text/html"); //for a html email
+            }
+        } catch (MessagingException e) {
+            return e.toString();
+        }
+        Transport transport = null;
+        try {
+            transport = session.getTransport("smtp");
+        } catch (NoSuchProviderException e) {
+            System.out.println("No such Provider Exception");
+            return e.toString();
+        }
+        try {
+            transport.connect(mailhost, user, password);
+            transport.sendMessage(message, message.getAllRecipients());
+            transport.close();
+            System.out.println("Email sent successfully.");
+            return "success";
+        } catch (MessagingException e) {
+            System.out.println("somthing went wrong-->Messaging Exception" + e);
+            return e.toString();
+        }
+    }
+
+
+    public String emailSendTesting() {
+
+        String mailhost = "smtp.office365.com", auth = "false", Starttls = "true", mailUsername =
+            "berp.noreply@bharuwasolutions.com", emailPassword = "Pab89764", ccUser = "", bcc = "", subject =
+            "fgf", isAnyAtchmapt = "N", fileNameNPath = "", mailFilename = "", toUser = "", po = "", bodyMsg = "HIIII";
+        //toUser = "sawan.kumar@bharuwasolutions.com";
+        toUser = "sawan.kumar@bharuwasolutions.com;rajat.khanduri@bharuwasolutions.com;";
+        ccUser = "sawan.kumar@bharuwasolutions.com;rajat.khanduri@bharuwasolutions.com;";
+        bcc = "sawan.kumar@bharuwasolutions.com;rajat.khanduri@bharuwasolutions.com;";
+        Properties emailProperties = new Properties();
+        emailProperties.put("mail.smtp.host", mailhost);
+        emailProperties.put("mail.smtp.auth", auth);
+        emailProperties.put("mail.smtp.starttls.enable", Starttls);
+        //Login Credentials
+        final String user = mailUsername; //change accordingly
+        final String password = emailPassword; //change accordingly
+        //Authenticating...
+        Session session = Session.getInstance(emailProperties, new javax.mail.Authenticator() {
+            public PasswordAuthentication getPasswordAuthentication() {
+                return new PasswordAuthentication(user, password);
+            }
+        });
+        //1) create MimeBodyPart object and set your message content
+        MimeMessage message = new MimeMessage(session);
+        try {
+            message.setFrom(new InternetAddress(user));
+
+            String[] recipientList = toUser.split(";");
+            InternetAddress[] recipientAddress = new InternetAddress[recipientList.length];
+            int counter = 0;
+            for (String recipient : recipientList) {
+                recipientAddress[counter] = new InternetAddress(recipient.trim());
+                counter++;
+            }
+            message.setRecipients(Message.RecipientType.TO, recipientAddress);
+            //  message.addRecipient(Message.RecipientType.TO, (Address) new InternetAddress(toUser));
+           // message.setRecipients(Message.RecipientType.TO, (Address[]) InternetAddress.parse(toUser));
+            if (!ccUser.equalsIgnoreCase("")) {
+                if (!ccUser.isEmpty()) {
+                    String[] recipientListCC = ccUser.split(";");
+                    InternetAddress[] recipientAddressCC = new InternetAddress[recipientList.length];
+                    int counterCC = 0;
+                    for (String recipient : recipientListCC) {
+                        recipientAddressCC[counterCC] = new InternetAddress(recipient.trim());
+                        counterCC++;
+                    }
+                    message.setRecipients(Message.RecipientType.CC, recipientAddressCC);
+                    //message.setRecipients(Message.RecipientType.CC, (Address[]) InternetAddress.parse(ccUser));
+                }
+            }
+            if (!bcc.equalsIgnoreCase("")) {
+                if (!bcc.isEmpty()) {
+                    String[] recipientListBCC = ccUser.split(";");
+                    InternetAddress[] recipientAddressBCC = new InternetAddress[recipientList.length];
+                    int counterBCC = 0;
+                    for (String recipient : recipientListBCC) {
+                        recipientAddressBCC[counterBCC] = new InternetAddress(recipient.trim());
+                        counterBCC++;
+                    }
+                    message.setRecipients(Message.RecipientType.BCC, recipientAddressBCC);
+                    //message.setRecipients(Message.RecipientType.BCC, (Address[]) InternetAddress.parse(bcc));
                 }
             }
             message.setSubject(subject);
