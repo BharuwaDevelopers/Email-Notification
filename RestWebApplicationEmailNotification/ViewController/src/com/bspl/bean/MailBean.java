@@ -45,7 +45,7 @@ public class MailBean {
     RestAdapterCommonDao restadapterdao = new RestAdapterCommonDao();
 
     @SuppressWarnings("oracle.jdeveloper.java.semantic-warning")
-    public Map<String, String> InfoFunction(String UnitCode) {
+    public Map<String, String> InfoFunction1(String UnitCode) {
         PreparedStatement ps = null;
         ResultSet mailInfo = null;
         Connection conn = null;
@@ -265,11 +265,152 @@ public class MailBean {
         return result;
     }
 
+
+    @SuppressWarnings({ "oracle.jdeveloper.java.semantic-warning", "deprecation" })
+    public String sendMailHrMethod(String unitCode, String tcode, String docNo) {
+        PreparedStatement ps = null;
+        PreparedStatement ps1 = null;
+        ResultSet rs = null;
+        ResultSet rs1 = null;
+        Connection conn = null;
+        Statement stmt = null;
+        Statement stmt1 = null;
+        // Statement stmt2 = null;
+        String bodyMsg = null;
+        String subject = null;
+        String toUser = null;
+        String ccUser = null;
+        String bcc = null;
+        String mailhost = null;
+        String auth = null;
+        String Starttls = null;
+        String mailUsername = null;
+        String emailPassword = null;
+        String isAnyAtchmapt = null;
+        String report_param_val = null;
+        String fileNameNPath = null;
+        String filePath = null;
+        String mailFilename = null;
+        String result = "No Record Found";
+        String sent_status = "N";
+        String pdf_generated = null;
+        String report_format = null;
+        String report_path = null;
+        String report_name = null;
+        Map parameters = new HashMap();
+        try {
+            conn = restadapterdao.getConnection(unitCode);
+            conn.setAutoCommit(false);
+            stmt = conn.createStatement();
+            stmt1 = conn.createStatement();
+            /// stmt2 = conn.createStatement();
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+        try {
+            String emailQuery =
+                "SELECT host_name, port, auth, starttls,email_username, email_password, to_mail, cc_mail, bcc_mail, subject, body, signature, t_code, mail_type, file_path, file_name, key_no, maillineid, active_flag FROM public.sendmail_config where active_flag='Y' and t_code='" +
+                tcode.trim().toUpperCase() + "'";
+            System.out.println("emailQuery---" + emailQuery);
+            ps = conn.prepareStatement(emailQuery);
+            rs = ps.executeQuery();
+            if (rs.next()) {
+                mailhost = (String) rs.getString("host_name");
+                auth = (String) rs.getString("auth");
+                Starttls = (String) rs.getString("starttls");
+                mailUsername = (String) rs.getString("email_username");
+                emailPassword = (String) rs.getString("email_password");
+            } else {
+                return "Email Authentication not maintain";
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        try {
+            String query = null;
+            if (docNo.equalsIgnoreCase("API")) {
+                query = "select * from email_notification where mail_sent_status<>'Y' or mail_sent_status is null";
+            } else {
+                query =
+                    "select * from email_notification where mail_sent_status<>'Y' or mail_sent_status is null and ref_document_number='" +
+                    docNo.trim() + "'";
+            }
+            System.out.println("query--->" + query);
+            ps1 = conn.prepareStatement(query);
+            rs1 = ps1.executeQuery();
+            while (rs1.next()) {
+                String ref_document_number = (String) rs1.getString("ref_document_number");
+                String ref_document_id = (String) rs1.getString("ref_document_id");
+                bodyMsg = (String) rs1.getString("body");
+                ccUser = (String) rs1.getString("cc_mail");
+                bcc = (String) rs1.getString("bcc_mail");
+                subject = (String) rs1.getString("subject");
+                isAnyAtchmapt = (String) rs1.getString("attachment_required");
+                report_param_val = (String) rs1.getString("report_param_val");
+                pdf_generated = (String) rs1.getString("pdf_generated");
+                report_format = (String) rs1.getString("report_format");
+                report_path = (String) rs1.getString("report_path");
+                // report_path = "/home/lenovo/jdeveloper/";
+                report_name = (String) rs1.getString("report_name");
+                toUser = (String) rs1.getString("to_mail");
+                if (toUser == null) {
+                    return "Maintain Email Id";
+                }
+
+//              String  msg="<p>!!OM!!</P>\n" + 
+//                "<p>Dear Sir,</p>\n" + 
+//                "<p>I would like to inform you that Test Employee with ID 123456789 has joined the Stores department on 01/01/2025 as SENIOR GENERAL MANAGER.</p>\n" + 
+//                "<p>Kindly provide your approval for this new employee </p>\n" + 
+//                "<p>Thank you for your attention to this matter. I look forward to your approval.</p>";
+                 bodyMsg ="<html><body>"+bodyMsg+"<p><a href=\"http://10.0.6.171:9090/berpbdqc/faces/login.jspx\">Please  Click here to Approve</a></p><p>This is a system generated email. Please do not reply to this message.</p></body></html>";
+                result =
+                    emailSend(mailhost, auth, Starttls, mailUsername, emailPassword, ccUser, bcc, subject,
+                              isAnyAtchmapt, fileNameNPath, mailFilename, toUser, ref_document_number, bodyMsg);
+                if (result.equalsIgnoreCase("success")) {
+                    sent_status = "Y";
+                    String updatePo_headsQuery =
+                        "update EMP_MASTER_HD set mail_sent_flag='Y' where emp_number='" + ref_document_number + "'";
+                    stmt1.addBatch(updatePo_headsQuery);
+                }
+                String updateEmailInfoQuery =
+                    "update email_notification set mail_sent_status='" + sent_status + "', mail_renarks='" + result +
+                    "' where ref_document_number='" + ref_document_number + "'";
+                stmt.addBatch(updateEmailInfoQuery);
+            }
+            int[] updateCounts = stmt.executeBatch();
+            int[] updateCounts1 = stmt1.executeBatch();
+            // int[] updateCounts2 = stmt2.executeBatch();
+            conn.commit();
+        } catch (Exception e) {
+            if (conn != null) {
+                restadapterdao.closeDataSourceConnection(conn);
+            }
+            result = e.toString();
+            return result;
+        } finally {
+            if (conn != null) {
+                try {
+                    stmt.close();
+                    stmt1.close();
+                    // stmt2.close();
+                    restadapterdao.closeDataSourceConnection(conn);
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+
+            }
+        }
+        return result;
+    }
+
+
     public String emailSend(String mailhost, String auth, String Starttls, String mailUsername, String emailPassword,
                             String ccUser, String bcc, String subject, String isAnyAtchmapt, String fileNameNPath,
                             String mailFilename, String toUser, String po, String bodyMsg) {
-        toUser = "sawan.kumar@bharuwasolutions.com;rajat.khanduri@bharuwasolutions.com";
-        // ccUser = "sawan.kumar@bharuwasolutions.com,rajat.khanduri@bharuwasolutions.com";
+        // toUser = "sawan.kumar@bharuwasolutions.com;rajat.khanduri@bharuwasolutions.com";
+        //toUser="shubham.chaudhary@bharuwasolutions.com;raghvendra.singh@bharuwasolutions.com;sawan.kumar@bharuwasolutions.com;";
+       //  ccUser = "sawan.kumar@bharuwasolutions.com;rajat.khanduri@bharuwasolutions.com";
         // bcc = "sawan.kumar@bharuwasolutions.com,rajat.khanduri@bharuwasolutions.com";
         Properties emailProperties = new Properties();
         emailProperties.put("mail.smtp.host", mailhost);
@@ -298,33 +439,49 @@ public class MailBean {
             }
             message.setRecipients(Message.RecipientType.TO, recipientAddress);
             //  message.addRecipient(Message.RecipientType.TO, (Address) new InternetAddress(toUser));
-           // message.setRecipients(Message.RecipientType.TO, (Address[]) InternetAddress.parse(toUser));
-            if (!ccUser.equalsIgnoreCase("")) {
-                if (!ccUser.isEmpty()) {
-                    String[] recipientListCC = ccUser.split(";");
-                    InternetAddress[] recipientAddressCC = new InternetAddress[recipientList.length];
-                    int counterCC = 0;
-                    for (String recipient : recipientListCC) {
-                        recipientAddressCC[counterCC] = new InternetAddress(recipient.trim());
-                        counterCC++;
-                    }
-                    message.setRecipients(Message.RecipientType.CC, recipientAddressCC);
-                    //message.setRecipients(Message.RecipientType.CC, (Address[]) InternetAddress.parse(ccUser));
+            // message.setRecipients(Message.RecipientType.TO, (Address[]) InternetAddress.parse(toUser));
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+
+        if (ccUser == null || ccUser.equalsIgnoreCase("") || ccUser.isEmpty()) {
+
+        } else {
+            try {
+                String[] recipientListCC = ccUser.split(";");
+                InternetAddress[] recipientAddressCC = new InternetAddress[recipientListCC.length];
+                int counterCC = 0;
+                for (String recipient : recipientListCC) {
+                    recipientAddressCC[counterCC] = new InternetAddress(recipient.trim());
+                    counterCC++;
                 }
+
+                message.setRecipients(Message.RecipientType.CC, recipientAddressCC);
+                //message.setRecipients(Message.RecipientType.CC, (Address[]) InternetAddress.parse(ccUser));
+            } catch (Exception ex) {
+                ex.printStackTrace();
             }
-            if (!bcc.equalsIgnoreCase("")) {
-                if (!bcc.isEmpty()) {
-                    String[] recipientListBCC = ccUser.split(";");
-                    InternetAddress[] recipientAddressBCC = new InternetAddress[recipientList.length];
-                    int counterBCC = 0;
-                    for (String recipient : recipientListBCC) {
-                        recipientAddressBCC[counterBCC] = new InternetAddress(recipient.trim());
-                        counterBCC++;
-                    }
-                    message.setRecipients(Message.RecipientType.BCC, recipientAddressBCC);
-                    //message.setRecipients(Message.RecipientType.BCC, (Address[]) InternetAddress.parse(bcc));
+        }
+
+        if (bcc == null || bcc.equalsIgnoreCase("") || bcc.isEmpty()) {
+
+        } else {
+            try {
+                String[] recipientListBCC = ccUser.split(";");
+                InternetAddress[] recipientAddressBCC = new InternetAddress[recipientListBCC.length];
+                int counterBCC = 0;
+                for (String recipient : recipientListBCC) {
+                    recipientAddressBCC[counterBCC] = new InternetAddress(recipient.trim());
+                    counterBCC++;
                 }
+                message.setRecipients(Message.RecipientType.BCC, recipientAddressBCC);
+            } catch (Exception ex) {
+                ex.printStackTrace();
             }
+            //message.setRecipients(Message.RecipientType.BCC, (Address[]) InternetAddress.parse(bcc));
+        }
+
+        try {
             message.setSubject(subject);
             BodyPart messageBody = new MimeBodyPart();
             // bodyMsg ="<html><body><H5>||OM||</H5></br><p>Dear "+created_by+",</br>  </p><p>Please find the attached here with our Purchase order/Service/Contact order No. (" +po+ ") dated ("+date+")  along with Terms & Conditions. You are requested to go through the same and send us the order confirmation.</p><br/> <br/> <p style=\"color:red;\">** Note it is auto generated mail, do not reply on this email. Please contact buyer, if need any assistance/query**</p></br></br><p>Thanks & Regards</br><b>"+signature+"</b></p></body></html>";
@@ -376,11 +533,12 @@ public class MailBean {
 
         String mailhost = "smtp.office365.com", auth = "false", Starttls = "true", mailUsername =
             "berp.noreply@bharuwasolutions.com", emailPassword = "Pab89764", ccUser = "", bcc = "", subject =
-            "fgf", isAnyAtchmapt = "N", fileNameNPath = "", mailFilename = "", toUser = "", po = "", bodyMsg = "HIIII";
+            "Mail Send Successfully", isAnyAtchmapt = "N", fileNameNPath = "", mailFilename = "", toUser = "", po =
+            "", bodyMsg = null,msg=null;
         //toUser = "sawan.kumar@bharuwasolutions.com";
-        toUser = "sawan.kumar@bharuwasolutions.com;rajat.khanduri@bharuwasolutions.com;";
-        ccUser = "sawan.kumar@bharuwasolutions.com;rajat.khanduri@bharuwasolutions.com;";
-        bcc = "sawan.kumar@bharuwasolutions.com;rajat.khanduri@bharuwasolutions.com;";
+        toUser = "raghvendra.singh@bharuwasolutions.com;shubham.chaudhary@bharuwasolutions.com";
+        ccUser = "sawan.kumar@bharuwasolutions.com;";
+        bcc = "sawan.kumar@bharuwasolutions.com;";
         Properties emailProperties = new Properties();
         emailProperties.put("mail.smtp.host", mailhost);
         emailProperties.put("mail.smtp.auth", auth);
@@ -408,11 +566,11 @@ public class MailBean {
             }
             message.setRecipients(Message.RecipientType.TO, recipientAddress);
             //  message.addRecipient(Message.RecipientType.TO, (Address) new InternetAddress(toUser));
-           // message.setRecipients(Message.RecipientType.TO, (Address[]) InternetAddress.parse(toUser));
+            // message.setRecipients(Message.RecipientType.TO, (Address[]) InternetAddress.parse(toUser));
             if (!ccUser.equalsIgnoreCase("")) {
                 if (!ccUser.isEmpty()) {
                     String[] recipientListCC = ccUser.split(";");
-                    InternetAddress[] recipientAddressCC = new InternetAddress[recipientList.length];
+                    InternetAddress[] recipientAddressCC = new InternetAddress[recipientListCC.length];
                     int counterCC = 0;
                     for (String recipient : recipientListCC) {
                         recipientAddressCC[counterCC] = new InternetAddress(recipient.trim());
@@ -425,7 +583,7 @@ public class MailBean {
             if (!bcc.equalsIgnoreCase("")) {
                 if (!bcc.isEmpty()) {
                     String[] recipientListBCC = ccUser.split(";");
-                    InternetAddress[] recipientAddressBCC = new InternetAddress[recipientList.length];
+                    InternetAddress[] recipientAddressBCC = new InternetAddress[recipientListBCC.length];
                     int counterBCC = 0;
                     for (String recipient : recipientListBCC) {
                         recipientAddressBCC[counterBCC] = new InternetAddress(recipient.trim());
@@ -437,7 +595,12 @@ public class MailBean {
             }
             message.setSubject(subject);
             BodyPart messageBody = new MimeBodyPart();
-            // bodyMsg ="<html><body><H5>||OM||</H5></br><p>Dear "+created_by+",</br>  </p><p>Please find the attached here with our Purchase order/Service/Contact order No. (" +po+ ") dated ("+date+")  along with Terms & Conditions. You are requested to go through the same and send us the order confirmation.</p><br/> <br/> <p style=\"color:red;\">** Note it is auto generated mail, do not reply on this email. Please contact buyer, if need any assistance/query**</p></br></br><p>Thanks & Regards</br><b>"+signature+"</b></p></body></html>";
+            msg="<p>!!OM!!</P>\n" + 
+            "<p>Dear Sir,</p>\n" + 
+            "<p>I would like to inform you that Test Employee with ID 123456789 has joined the Stores department on 01/01/2025 as SENIOR GENERAL MANAGER.</p>\n" + 
+            "<p>Kindly provide your approval for this new employee </p>\n" + 
+            "<p>Thank you for your attention to this matter. I look forward to your approval.</p>";
+             bodyMsg ="<html><body>"+msg+"<p><a href=\"https://www.w3schools.com/\">Visit W3Schools.com!</a></p><p>This is a system generated email. Please do not reply to this message.</p></body></html>";
             messageBody.setText(bodyMsg);
             messageBody.setContent(bodyMsg, "text/html");
             // If there is any attachment to send

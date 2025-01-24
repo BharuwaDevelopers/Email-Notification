@@ -14,7 +14,12 @@ public class WS_SendMail {
     @Produces("application/json")
     public String getSendMail(@QueryParam("UnitCode") String unitCode,@QueryParam("Tcode") String tcode,@QueryParam("DocNo") String docNo){
       return mailbean.sendMailMethod(unitCode,tcode,docNo) ;
-       // return mailbean.emailSendTesting() ;
+      //  return mailbean.emailSendTesting() ;
     }
+    
+//        public String getSendMail(){
+//          //return mailbean.sendMailMethod(unitCode,tcode,docNo) ;
+//        return mailbean.emailSendTesting() ;
+//    }
     
 }

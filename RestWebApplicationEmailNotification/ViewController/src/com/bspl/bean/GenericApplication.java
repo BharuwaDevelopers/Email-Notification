@@ -10,9 +10,12 @@ import javax.ws.rs.core.Application;
 public class GenericApplication extends Application {
     public Set<Class<?>> getClasses() {
         Set<Class<?>> classes = new HashSet<Class<?>>();
+
         // Register root resources.
         classes.add(WS_GenratePdfFile.class);
+        classes.add(WS_HR_EMAIL.class);
         classes.add(WS_SendMail.class);
+
         // Register provider classes.
 
         return classes;

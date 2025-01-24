@@ -23,7 +23,7 @@ public class RestAdapterCommonDao {
         String pwd = excelObj[1].toString();
         String ipAddress = excelObj[2].toString();
         String url = "jdbc:postgresql://" + ipAddress + "/" + dbname + "";
-        System.out.println("url--->" + url);
+       // System.out.println("url--->" + url);
         String user = "postgres";
         String password = pwd;
         Connection conn = null;
@@ -100,7 +100,7 @@ public class RestAdapterCommonDao {
         Object[] obj = d.toArray();
         int i = 1;
         while (i < obj.length) {
-            System.out.println("value---" + obj[i]);
+        //    System.out.println("value---" + obj[i]);
             if (obj[i].toString().contains(unitcd)) {
                 ArrayList arry = (ArrayList) obj[i];
                 Object[] cv2 = arry.toArray();
